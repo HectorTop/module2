@@ -1,238 +1,316 @@
 import numpy as np
 import pandas as pd
 
-# v pandas mozhno indeksirovat ne tolko chislami
+# esli razmernost >2 use ierarchic indexation (multyindex). V odnom indexze neskolko urovnei
 
-#osn struct - series, DataFrame, Index
+index = [
+    ('city_1',2010),
+    ('city_1',2020),
+    ('city_2',2010),
+    ('city_2',2020),
+    ('city_3',2010),
+    ('city_3',2020)
+]
 
-data = pd.Series([0.25,0.5,0.75,1.0])
-print(data)
-print(type(data))
+population = [
+    101,
+    201,
+    102,
+    202,
+    103,
+    203
+]
 
-print(data.values)
-print(data.index)
+pop = pd.Series(population,index = index)
 
-print(data[0])
-print(data[1:3])
+print(pop)
 
-data = pd.Series([0.25,0.5,0.75,1.0],index=['a','b','c','d'])
-print(data)
-print(data['a'])
-print(data['b':'d'])
+#print(pop[[i for i in pop.index if i[1] == 2020]])
 
-data = pd.Series([0.25,0.5,0.75,1.0],index=[1,7,10,'d'])
-print(data)
-print(data[1])
-print(data[7:'d'])
+index = pd.MultiIndex.from_tuples(index)
+pop = pop.reindex(index)
+print(pop)
 
-population_dict = {
-    'city_1':1000,
-    'city_2':2000,
-    'city_3':3000,
-    'city_4':4000,
-    'city_5':5000
+print(pop[:,2020])
+pop_df=pop.unstack()
+print(pop_df)
+print(pop_df.stack())
+
+index = [
+    ('city_1',2010,1),
+    ('city_1',2010,2),
+    ('city_1',2020,1),
+    ('city_1',2020,2),
+    ('city_2',2010,1),
+    ('city_2', 2010,2),
+    ('city_2',2020,1),
+    ('city_2', 2020,2),
+    ('city_3',2010,1),
+    ('city_3', 2010,2),
+    ('city_3',2020,1),
+    ('city_3',2020,2)
+]
+
+population = [
+    101,
+    1010,
+    201,
+    2010,
+    102,
+    1020,
+    202,
+    2020,
+    103,
+    1030,
+    203,
+    2030
+]
+
+pop = pd.Series(population,index = index)
+print(pop)
+index = pd.MultiIndex.from_tuples(index)
+pop = pop.reindex(index)
+print(pop)
+print(pop[:,2010])
+pop_df = pop.unstack()
+print(pop_df)
+print(pop_df.stack())
+
+index = [
+    ('city_1',2010,1),
+    ('city_1',2010,2),
+    ('city_1',2020,1),
+    ('city_1',2020,2),
+    ('city_2',2010,1),
+    ('city_2', 2010,2),
+    ('city_2',2020,1),
+    ('city_2', 2020,2),
+    ('city_3',2010,1),
+    ('city_3', 2010,2),
+    ('city_3',2020,1),
+    ('city_3',2020,2)
+]
+
+population = [
+    101,
+    1010,
+    201,
+    2010,
+    102,
+    1020,
+    202,
+    2020,
+    103,
+    1030,
+    203,
+    2030
+]
+pop = pd.Series(population,index = index)
+print(pop)
+index = pd.MultiIndex.from_tuples(index)
+pop_df = pd.DataFrame(
+    {
+        'total':pop,
+        'something':[
+            10,
+            11,
+            21,
+            21,
+            12,
+            12,
+            22,
+            22,
+            13,
+            13,
+            23,
+            23
+        ]
+    }
+)
+print(pop_df)
+
+print(pop_df['something'])
+
+#pop_df_1 = pop_df.loc['city_1','something']
+#print(pop_df_1)
+
+#kak ispolzovat multiindex
+#1 - spisok massiva,zadaushich index na kazhdom urovne
+
+i1 = pd.MultiIndex.from_arrays(
+    [
+        ['a','b','c','d'],
+        [1,2,3,4]
+    ]
+)
+
+#2 - spisok kortezhey,zadaushich znacheniye indexa
+
+i2 = pd.MultiIndex.from_tuples(
+    [
+        ('a',1),
+        ('b',2),
+        ('c',3),
+        ('d',4)
+    ]
+)
+
+#3 - cherez dekartovo proizvedeniye
+
+i3 = pd.MultiIndex.from_product(
+    [
+        ['a',1],
+        ['b',2]
+    ]
+)
+
+#prosto o[isaniye vnutrennego predstavleniya: levels
+i4 = pd.MultiIndex(
+    levels = [
+        ['a','b','c'],
+        [1,2]
+    ],
+    codes = [
+        [0,0,1,1,2,2],
+        [0,1,0,1,0,1]
+    ]
+)
+#urovnyami mozhno zadavat nazvaniya
+
+data = {
+    ('city_1',2010):100,
+    ('city_1',2020):200,
+    ('city_2',2010):1001,
+    ('city_2',2020):2001,
 }
-
-population = pd.Series(population_dict)
-
-print(population['city_4'])
-print(population['city_4':'city_5'])
-
-
-#DataFrame - 2d massive s opr indexami, soglassovannie po indexas seriesi
-
-population_dict = {
-    'city_1':1000,
-    'city_2':2000,
-    'city_3':3000,
-    'city_4':4000,
-    'city_5':5000
-}
-population = pd.Series(population_dict)
-
-area_dict = {
-    'city_1':100,
-    'city_2':200,
-    'city_3':300,
-    'city_4':400,
-    'city_5':500
-}
-area = pd.Series(area_dict)
-
-states = pd.DataFrame({
-    'population1':population,
-    'area1':area
-})
-
-print(states)
-print(states.index)
-print(states.columns)
-
-print(type(states.values))
-print(type(states.index))
-print(type(states.columns))
-
-print(states['area1'])
-
-#sozdat mozhno cherez series, list of dict, dict of series, 2d np array, structed massive numpy
-
-#index - can not change, sorted, multimnozhestvo(povtor znach)
-
-ind = pd.Index([2,3,5,7,11])
-print(ind[1])
-print(ind[::2])
-
-indA = pd.Index([1,2,3,4,5])
-indB = pd.Index([6,7,8,9,1])
-
-print(indA.intersection(indB))
-
-data = pd.Series([0.25,0.5,0.75,1.0],index=['a','b','c','d'])
-
-print('a' in data)
-print('z' in data)
-
-print(data.keys())
-
-print(list(data.items()))
-
-data['a'] = 100
-data['z'] = 1000
-
-print(data['a':'c'])
-print(data[0:2])
-print(data[(data>0.5)&(data<1)])
-#print(data['a','d'])
-
-#atributi - indexatori
-
-print(data.loc(1))
-print(data.iloc(1))
-
-pop = pd.series({
-    'city_1':1000,
-    'city_2':2000,
-    'city_3':3000,
-    'city_4':4000,
-    'city_5':5000
-})
-
-
-area = pd.series({
-    'city_1':100,
-    'city_2':200,
-    'city_3':300,
-    'city_4':400,
-    'city_5':500
-})
-area = pd.DataFrame({'area':area,'pop':pop})
-
-print(data)
-print(data['area1'])
-print(data.area1)
-
-print(data.pop1 is data['pop1'])
-
-data['new'] = data['area1']
-
-
-data['new1'] = data['area1']/data['pop1']
-
-print(data)
-
-#2d numpy massiv, udobniy dlya drugih rabot
-
-data = pd.DataFrame({'area1':area, 'pop1':pop, 'pop':pop})
-
-print(data)
-print(data.iloc[:3,1:2])
-print(data.loc[:'city4','pop1':pop])
-print(data.loc[data['pop']>1002,['area1','pop']])
-
-rng = np.random.default_rng()
-s = pd.Series(rng.integers(0,10,4))
-
+s = pd.Series(data)
 print(s)
-print(np.exp(s))
 
-pop = pd.series({
-    'city_1':1000,
-    'city_2':2000,
-    'city_3':3000,
-    'city_4':4000,
-    'city_5':5000
-})
+s.index_names = ['city','year']
+print(s)
 
+index = pd.MultiIndex.from_product(
+    [
+        ['city_1','city_2'],
+        [2010,2020]
+    ],
+    names = ['city','year']
+)
 
-area = pd.series({
-    'city_1':100,
-    'city_2':200,
-    'city_3':300,
-    'city_42':400,
-    'city_52':500
-})
-
-data = pd.DataFrame({'area1':area, 'pop1':pop})
-
-dfA = pd.DataFrame(rng.integers(0,10,(2,2)),columns=['a','b'])
-
-dfB = pd.DataFrame(rng.integers(0,10,(3,3)),columns=['a','b','c'])
-
-print(dfA + dfB)
+columns = pd.MultiIndex.from_product(
+    [
+        ['person_1','person_2','person_3'],
+        ['job_1','job_2']
+    ],
+    names = ['worker','job']
+)
 
 rng = np.random.default_rng(1)
 
-A = rng.integers(0,10,(3,4))
-print(A)
+data = rng.random((4,6))
+print(data)
 
-print(A[0])
-print(A - A[0])
+data_df = pd.DataFrame(data,index=index,columns = columns)
+print(data_df)
 
-df = pd.DataFrame(A,columns=['a','b','c','d'])
-print(df)
+#indexatsia i srezi po multiindexu
 
-print(df.iloc[0])
+data = {
+    ('city_1',2010):100,
+    ('city_1',2020):200,
+    ('city_2',2010):1001,
+    ('city_2',2020):2001,
+}
+s = pd.Series(data)
+s.index_names = ['city','year']
+print(s)
+print(s['city_1',2010])
+print(s['city_1'])
+print(s.loc['city_1':'city_2'])
 
-print(df - df.iloc[0])
+print(s[s>2000])
+print(s[['city_1','city_3']])
 
-print(df.iloc[0,::2])
+#vzyat za osnovy dataframe s sled structuroi
 
-print(df - df.iloc[0,::2])
-
-#NAN - not a number
-#NA - znachenia
-
-#dva sposoba chranenia otsut znach
-#1) indikatori Nan ili none
-#2) null
-
-val1 = np.array([1,2,3,np.none])
-print(val1.Nansum(val1))
-
-x = pd.Series(range(10),dtype=int)
-x[0] = None
-x[1] = np.nan
-
-x2 = pd.Series([1,2,3,np.nan,None,pd.NA])
-x3= pd.Series([1,2,3,np.nan,None,pd.NA],dtype='Int32')
-
-print(x3.isnull())
-print(x3[x3.isnull()])
-print(x3[x3.notnull()])
-
-print(x3.dropna())
-df = pd.DataFrame(
+#peregruppirovka multiindexov
+rng = np.random.default_rng(1)
+index = pd.MultiIndex.from_product(
     [
-        [1,2,3,np.nan,None,pd.NA],
-        [1,2,3,4,5,6]
-        [1,np.nan,3,4,np.nan,6]
+        ['a','c','b'],
+        [1,2]
     ]
 )
-print(df)
-print(df.dropna())
-print(df.dropna(axis=0))
-print(df.dropna(axis=1))
 
-print(df.dropna(axis=1,how='all'))
-print(df.dropna(axis=1,how='any'))
-print(df.dropna(axis=1,thresh=2))
+data = pd.Series(rng.random(6),index = index)
+data.index.names = ['char','int']
+
+print(data)
+print(data['a':'b'])
+
+data = data.sort_index()
+print(data)
+print(data['a':'b'])
+
+index = [
+    ('city_1',2010,1),
+    ('city_1',2010,2),
+    ('city_1',2020,1),
+    ('city_1',2020,2),
+    ('city_2',2010,1),
+    ('city_2', 2010,2),
+    ('city_2',2020,1),
+    ('city_2', 2020,2),
+    ('city_3',2010,1),
+    ('city_3', 2010,2),
+    ('city_3',2020,1),
+    ('city_3',2020,2)
+]
+
+population = [
+    101,
+    1010,
+    201,
+    2010,
+    102,
+    1020,
+    202,
+    2020,
+    103,
+    1030,
+    203,
+    2030
+]
+
+pop = pd.Series(population,index=index)
+
+print(pop)
+
+i = pd.MultiIndex.from_tuples(index)
+
+pop = pop.reindex(i)
+
+print(pop)
+print(pop.unstack(level=0))
+print(pop.unstack(level=1))
+
+#numpy concatenation
+
+x = [1,2,3]
+y = [4,5,6]
+z = [7,8,9]
+
+print(np.concatenate(x,y,z))
+print(np.concatenate(x,y,z,axis =1))
+print(np.concatenate(x,y,z,axis = 0))
+
+ser1 = pd.Series(['a','b','c'],index = [1,2,3])
+ser2 = pd.Series(['d','e','f'],index = [4,5,6])
+
+print(pd.concat([ser1,ser2],verify_integrity=False))
+print(pd.concat([ser1,ser2],ignore_index=True))
+print(pd.concat([ser1,ser2],keys=['x','y']))
+
+print(pd.concat([ser1,ser2],join = 'outer'))
+print(pd.concat([ser1,ser2],join = 'inner'))
+
