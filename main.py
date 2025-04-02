@@ -1,316 +1,183 @@
+#обучение с учителем - классификация(дискретное) и регрессия(непрерывное
+#без учителя - выявление структцры немаркированных данных(кластеризация), делится на кластеризацию и понижение размерности(более сжатое представление данных)
+#частичное обучение - не все данные промаркированы
+#обучение с подкреплением - улучшает взаимодействие с данными при наградах
+
+import seaborn as sns
+
+iris = sns.load_dataset("iris")
+
+print(iris.head())
+
+print(type(iris.values))
+
+print(iris.values.shape)
+
+print(iris.columns)
+
+#строки - отдельные объекты(образцы)
+#столбцы - признаки
+#целевой массив - массив меток(одномерный, длина - ч-ло образцов)
+
+#процесс построения системы машинного обучения
+#1 - предварительная обработка (выбор и масштабирование признаков, понижение размерности, выборка образцов)
+#2 - обучение(выбор модели, перекрестная проверка, измерение эффективности, оптимизация гиперпараметров(внешние параметры)
+#3 - оценка и формирование финальной модели
+#4 - использование модели
+
+#scikit-learn
+#1 - класс модели, 2 - выбор гиперпараметров, 3 - матрица признаков и целевоцй массив, 4 - обучение модели fit(), predict()
+
+#линейная регрессия - обучение с учителем
+import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+from sklearn.linear_model import LinearRegression
 
-# esli razmernost >2 use ierarchic indexation (multyindex). V odnom indexze neskolko urovnei
+np.random.seed(1)
+x = 10*np.random.rand(50)
 
-index = [
-    ('city_1',2010),
-    ('city_1',2020),
-    ('city_2',2010),
-    ('city_2',2020),
-    ('city_3',2010),
-    ('city_3',2020)
+y = 2*x + np.random.rand(50)
+
+plt.scatter(x,y)
+plt.show()
+X=x[:,np.newaxis]
+model = LinearRegression()
+model.fit(X,y)
+
+print(model.coef_)
+
+#применение к новым данным
+
+xfit = np.linspace(0,10,5)
+yfit = model.predict(xfit[:,np.newaxis])
+#25.03.25
+from sklearn.datasets import make_regression
+features,target = make_regression(n_samples=7, n_features=1,n_informative=1, noise=1, random_state=1)
+print(features.head())
+print(target.head())
+model = LinearRegression.fit(features,target)
+
+plt.scatter(features,target)
+x = np.linspace(features.min(),features.max(),100)
+plt.plot(x,model.coef[0]*x + model.intercept_)
+plt.show()
+data = np.array[
+    [1,5],
+    [2,7],
+    [3,7],
+    [4,10],
+    [5,11],
+    [6,14],
+    [7,17],
+    [8,19],
+    [9,22],
+    [10,28]
 ]
+x = data[:,0]
+y = data[:,1]
+n = len(x)
+w_1 = (sum(x[i]*y[i] for i in range(n))*n - sum(x)*sum(y))/(n*sum(x**2) - n*sum(x)**2)
+w_0 = sum(y)/n - w_1*sum(x)/n
 
-population = [
-    101,
-    201,
-    102,
-    202,
-    103,
-    203
-]
+print(w_1,w_0)
+x_1 = np.vstack([x,np.ones(len(x))]).T
+w = inv(x_1.transpose() @ x_1) @ (x_1.transpose @ y)
+print(w)
+Q,R = np.qr(x_1)
+w = inv(R).dot(Q.transpose()).dot(y)
 
-pop = pd.Series(population,index = index)
+def f(x):
+    return (x-3)**2 +4
+def df(x):
+    return 2*(x-3)
+x = np.linspace(-10,10,100)
+ax = plt.gca()
+ax.xaxis.set_major_locator(plt.NullLocator(0.5))
+#plt.plot(x,f(x))
+plt.plot(x,df(x))
+plt.grid()
+plt.show()
 
-print(pop)
+L = 0.001
+iterations =100_000
+x = random.randint(0,5)
+for i in range(iterations):
+    d_x = dx_f(x)
+    x -= L*d_x
+print(x,f(x))
 
-#print(pop[[i for i in pop.index if i[1] == 2020]])
+w1 = 0.
+w0 = 0.
+for i in range(iterations):
+    D_w0 = 2*sum((y[i]-w0 - w1*x[i])for i in range(n))
+    D_w1 = 2 * sum(x[i]*(-y[i]-w0-w1*x[i])   for i in range(n))
+    w1 -= L *D_w1
+    w0 -= L* D_w0
 
-index = pd.MultiIndex.from_tuples(index)
-pop = pop.reindex(index)
-print(pop)
+w1 = np.linspace(-10,10,100)
+w0 = w1
+def E(w1,w0,x,y):
+    return sum((y[i]-(w0+w1*x))**2 for i in range(len(x)))
 
-print(pop[:,2020])
-pop_df=pop.unstack()
-print(pop_df)
-print(pop_df.stack())
+W1,W0=np.meshgrid(w1,w0)
+EW=E(W1,W0,x,y)
+ax = plt.axes(projection='3d')
+as.plot_surface(W1,W0,EW)
+w1_fit = 2.4
+w0_fit = 0.8
+E_fit = E(w1_fit, w0_fit , x , y)
+ax.scatter3D(w1_fit, w0_fit, E_fit, color='cyan')
 
-index = [
-    ('city_1',2010,1),
-    ('city_1',2010,2),
-    ('city_1',2020,1),
-    ('city_1',2020,2),
-    ('city_2',2010,1),
-    ('city_2', 2010,2),
-    ('city_2',2020,1),
-    ('city_2', 2020,2),
-    ('city_3',2010,1),
-    ('city_3', 2010,2),
-    ('city_3',2020,1),
-    ('city_3',2020,2)
-]
+#01.04.25
+#gradientniy spusk
+from statistics import LinearRegression
 
-population = [
-    101,
-    1010,
-    201,
-    2010,
-    102,
-    1020,
-    202,
-    2020,
-    103,
-    1030,
-    203,
-    2030
-]
+x = data [:,0]
+y = data [:,1]
+n = len(x)
+L=0.001
+sample_size = 1
+for i in range(iterations):
+    idx = np.random.choice(n,sample_size,replace = False)
+    D_w0 = 2*sum(-y[i]+w0+w1*x[i] for i in range(n))
+    D_w1 = 2*sum(((x[i]*(-y[i]+w0+w1*x[i]))) for i in range(n))
+    w1 -= L*D_w1
+    w0 -= L*D_w0
+#vnosim smeshenie i boremsya s pereobucheniyem
+#ocenka promaha
+data_df = pd.DataFrame(data)
+print(data_df.corr(method = 'pearson'))
+print(data_df[1].values[::-1])
+#obuchaushie i testovie viborki
+#nabor dannih delitsa na obuchaushyu 2 chasti i testovyu  1 chast
+X = data_df.values[:,0]
+Y = data_df.values[:,1]
 
-pop = pd.Series(population,index = index)
-print(pop)
-index = pd.MultiIndex.from_tuples(index)
-pop = pop.reindex(index)
-print(pop)
-print(pop[:,2010])
-pop_df = pop.unstack()
-print(pop_df)
-print(pop_df.stack())
+from sklearn.model_selection import train_test_split
+X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size = 1/3)
+model = LinearRegression()
+model.fit(X_train,Y_train)
+r = model.score(X_test,Y_test)
+print(r)
+#perekrestnaya validatsiya - model 3 raza obuchaut i 3 raza testiryut
+kfold = KFold(n_splits=3,random_state=1,shuffle=True)
+results = cross_val_score(model,X,Y,cv = kfold)
+print(results)
+print(results.mean(),results.std())
+#poelementno tozhe mozhno, mozhno sluchainuyu validatsiu
+#validatsionnaya viborka
+data_df = pd.read_csv('multiple_independent_variable_linear.csv')
+X = data_df.values[:,:-1]
+Y = data_df.values[:,-1]
+model = LinearRegression().fit(X,Y)
+print(model.coef_, model.intercept_)
+ax = plt.axes(projection="3d")
+ax.scatter3D(x1,x2,y)
 
-index = [
-    ('city_1',2010,1),
-    ('city_1',2010,2),
-    ('city_1',2020,1),
-    ('city_1',2020,2),
-    ('city_2',2010,1),
-    ('city_2', 2010,2),
-    ('city_2',2020,1),
-    ('city_2', 2020,2),
-    ('city_3',2010,1),
-    ('city_3', 2010,2),
-    ('city_3',2020,1),
-    ('city_3',2020,2)
-]
+x1_=np.linspace(min(x1),max(x1),100)
+x2_=np.linspace(min(x2),max(x2),100)
 
-population = [
-    101,
-    1010,
-    201,
-    2010,
-    102,
-    1020,
-    202,
-    2020,
-    103,
-    1030,
-    203,
-    2030
-]
-pop = pd.Series(population,index = index)
-print(pop)
-index = pd.MultiIndex.from_tuples(index)
-pop_df = pd.DataFrame(
-    {
-        'total':pop,
-        'something':[
-            10,
-            11,
-            21,
-            21,
-            12,
-            12,
-            22,
-            22,
-            13,
-            13,
-            23,
-            23
-        ]
-    }
-)
-print(pop_df)
-
-print(pop_df['something'])
-
-#pop_df_1 = pop_df.loc['city_1','something']
-#print(pop_df_1)
-
-#kak ispolzovat multiindex
-#1 - spisok massiva,zadaushich index na kazhdom urovne
-
-i1 = pd.MultiIndex.from_arrays(
-    [
-        ['a','b','c','d'],
-        [1,2,3,4]
-    ]
-)
-
-#2 - spisok kortezhey,zadaushich znacheniye indexa
-
-i2 = pd.MultiIndex.from_tuples(
-    [
-        ('a',1),
-        ('b',2),
-        ('c',3),
-        ('d',4)
-    ]
-)
-
-#3 - cherez dekartovo proizvedeniye
-
-i3 = pd.MultiIndex.from_product(
-    [
-        ['a',1],
-        ['b',2]
-    ]
-)
-
-#prosto o[isaniye vnutrennego predstavleniya: levels
-i4 = pd.MultiIndex(
-    levels = [
-        ['a','b','c'],
-        [1,2]
-    ],
-    codes = [
-        [0,0,1,1,2,2],
-        [0,1,0,1,0,1]
-    ]
-)
-#urovnyami mozhno zadavat nazvaniya
-
-data = {
-    ('city_1',2010):100,
-    ('city_1',2020):200,
-    ('city_2',2010):1001,
-    ('city_2',2020):2001,
-}
-s = pd.Series(data)
-print(s)
-
-s.index_names = ['city','year']
-print(s)
-
-index = pd.MultiIndex.from_product(
-    [
-        ['city_1','city_2'],
-        [2010,2020]
-    ],
-    names = ['city','year']
-)
-
-columns = pd.MultiIndex.from_product(
-    [
-        ['person_1','person_2','person_3'],
-        ['job_1','job_2']
-    ],
-    names = ['worker','job']
-)
-
-rng = np.random.default_rng(1)
-
-data = rng.random((4,6))
-print(data)
-
-data_df = pd.DataFrame(data,index=index,columns = columns)
-print(data_df)
-
-#indexatsia i srezi po multiindexu
-
-data = {
-    ('city_1',2010):100,
-    ('city_1',2020):200,
-    ('city_2',2010):1001,
-    ('city_2',2020):2001,
-}
-s = pd.Series(data)
-s.index_names = ['city','year']
-print(s)
-print(s['city_1',2010])
-print(s['city_1'])
-print(s.loc['city_1':'city_2'])
-
-print(s[s>2000])
-print(s[['city_1','city_3']])
-
-#vzyat za osnovy dataframe s sled structuroi
-
-#peregruppirovka multiindexov
-rng = np.random.default_rng(1)
-index = pd.MultiIndex.from_product(
-    [
-        ['a','c','b'],
-        [1,2]
-    ]
-)
-
-data = pd.Series(rng.random(6),index = index)
-data.index.names = ['char','int']
-
-print(data)
-print(data['a':'b'])
-
-data = data.sort_index()
-print(data)
-print(data['a':'b'])
-
-index = [
-    ('city_1',2010,1),
-    ('city_1',2010,2),
-    ('city_1',2020,1),
-    ('city_1',2020,2),
-    ('city_2',2010,1),
-    ('city_2', 2010,2),
-    ('city_2',2020,1),
-    ('city_2', 2020,2),
-    ('city_3',2010,1),
-    ('city_3', 2010,2),
-    ('city_3',2020,1),
-    ('city_3',2020,2)
-]
-
-population = [
-    101,
-    1010,
-    201,
-    2010,
-    102,
-    1020,
-    202,
-    2020,
-    103,
-    1030,
-    203,
-    2030
-]
-
-pop = pd.Series(population,index=index)
-
-print(pop)
-
-i = pd.MultiIndex.from_tuples(index)
-
-pop = pop.reindex(i)
-
-print(pop)
-print(pop.unstack(level=0))
-print(pop.unstack(level=1))
-
-#numpy concatenation
-
-x = [1,2,3]
-y = [4,5,6]
-z = [7,8,9]
-
-print(np.concatenate(x,y,z))
-print(np.concatenate(x,y,z,axis =1))
-print(np.concatenate(x,y,z,axis = 0))
-
-ser1 = pd.Series(['a','b','c'],index = [1,2,3])
-ser2 = pd.Series(['d','e','f'],index = [4,5,6])
-
-print(pd.concat([ser1,ser2],verify_integrity=False))
-print(pd.concat([ser1,ser2],ignore_index=True))
-print(pd.concat([ser1,ser2],keys=['x','y']))
-
-print(pd.concat([ser1,ser2],join = 'outer'))
-print(pd.concat([ser1,ser2],join = 'inner'))
-
+X1_, X2_ = np.meshgrid(x1_,x2_)
+Y_=model.intercept_ + model.coef_[0]*X1_ + model.coef_[1]*X2_
+ax.plot_surface(X1_,X2_,Y_,camp = "greys",alpha=0.1)
+plt.show()
